@@ -6,10 +6,36 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Empty
 from tello_driver.msg import TelloStatus
 from time import sleep
+from h264_image_transport.msg import H264Packet
+from sensor_msgs.msg import Image
+import cv2
+from cv_bridge import CvBridge, CvBridgeError
+
 
 global cont
 cont = True
 
+
+def subscribe_video():
+  print("subscribe video") 
+  sub = rospy.Subscriber('/tello/image_raw', Image,image_callback) 
+  print(sub)
+
+def image_callback(data):
+  print("image callback")
+  bridge = CvBridge()
+  try:
+    img = bridge.imgmsg_to_cv2(data, "bgr8")
+    print('take over')
+  except CvBridgeError as e:
+    print(e)
+  cv2.imshow('Original', img)
+  cv2.imshow('Canny', cv2.Canny(img, 100, 200))
+  cv2.waitkey(1)
+  pic_name = '~/tello.jpeg'
+  with open(pic_name,'wb') as fd:
+    fd.write(img)
+  pass
 
 def TakeOff():
   print("Takeoff")
@@ -81,6 +107,8 @@ def callback(data):
 
 if __name__ =='__main__':
   try:
+    subscribe_video()
+    sleep(1)
     TakeOff()
     sleep(1)
     move("z",2)
