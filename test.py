@@ -90,9 +90,10 @@ def Land():
   status_sub = rospy.Subscriber('/tello/status', TelloStatus,callback)
   land_pub = rospy.Publisher('/tello/land', Empty, queue_size =1)
   rate = rospy.Rate(10)
-  
-  while cont ==True:
+  try_count =0  
+  while (cont ==True and try_count <20):
     print("try land")
+    try_count +=1
     msg=Empty()
     land_pub.publish(msg)
     rate.sleep()
@@ -113,11 +114,11 @@ if __name__ =='__main__':
     sleep(1)
     move("z",2)
     sleep(1)
-    move("x",2)
+    move("x",1)
     sleep(1)
-    rotate("z",180)
+    rotate("z",360)
     sleep(1)
-    move("x",2)
+    move("x",1)
     sleep(1)    
     Land()
   except rospy.ROSInterruptException:
