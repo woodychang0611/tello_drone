@@ -21,7 +21,7 @@ def subscribe_video():
   rospy.init_node('tello_node',anonymous=True) 
   sub = rospy.Subscriber('/tello/image_raw', Image,image_callback) 
   print(sub)
-  rospy.spin()
+  #rospy.spin()
 
 def image_callback(data):
   print("image callback")
@@ -37,6 +37,16 @@ def image_callback(data):
   #with open(pic_name,'wb') as fd:
   #  fd.write(img)
   #pass
+
+def subscribe_h264():
+  print("subscribe h264")
+  rospy.Subscriber("/tello/image_raw/h264", H264Packet, h264_callback)
+
+def h264_callback(msg):
+    #rospy.loginfo('frame: %d bytes' % len(msg.data))
+    print("h264 video callback")
+    #stream.add_frame(msg.data)
+
 
 def init():
   print("init") 
@@ -89,13 +99,6 @@ def move(axis,value):
   sleep(5)
   print("move done")
 
-
-def fastmode():
-  print("fast mode")
-  pub =  rospy.Publisher('/tello/fast_mode', Bool, queue_size =1)
-  pub.publish(Bool(True))
-  sleep(1)
-
 def land():
   print("Land")
   global cont
@@ -147,6 +150,7 @@ def action2():
   try:
     init()
     subscribe_video()
+    subscribe_h264()
     sleep(3)
 
   except rospy.ROSInterruptException:
