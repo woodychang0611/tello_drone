@@ -10,33 +10,13 @@ from h264_image_transport.msg import H264Packet
 from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
-
+from lib import StandaloneVideoStream
 
 global cont
 cont = True
 
+stream = StandaloneVideoStream()
 
-def subscribe_video():
-  print("subscribe video")
-  rospy.init_node('tello_node',anonymous=True) 
-  sub = rospy.Subscriber('/tello/image_raw', Image,image_callback) 
-  print(sub)
-  #rospy.spin()
-
-def image_callback(data):
-  print("image callback")
-  bridge = CvBridge()
-  try:
-    img = bridge.imgmsg_to_cv2(data, "bgr8")
-  except CvBridgeError as e:
-    print(e)
-  cv2.imshow('Original', img)
-  cv2.imshow('Canny', cv2.Canny(img, 100, 200))
-  cv2.waitKey(1)
-  #pic_name = '~/tello.jpeg'
-  #with open(pic_name,'wb') as fd:
-  #  fd.write(img)
-  #pass
 
 def subscribe_h264():
   print("subscribe h264")
@@ -45,7 +25,7 @@ def subscribe_h264():
 def h264_callback(msg):
     #rospy.loginfo('frame: %d bytes' % len(msg.data))
     print("h264 video callback")
-    #stream.add_frame(msg.data)
+    stream.add_frame(msg.data)
 
 
 def init():
@@ -134,7 +114,6 @@ def flip():
 def action1():
   try:
     init()
-    fastmode()
     takeOff()
     move("z",1)
     move("x",1)
@@ -149,9 +128,8 @@ def action1():
 def action2():
   try:
     init()
-    subscribe_video()
     subscribe_h264()
-    sleep(3)
+    sleep(20)
 
   except rospy.ROSInterruptException:
     print("failed")
@@ -160,7 +138,6 @@ def action2():
 def action3():
   try:
     init()
-    fastmode()    
     takeOff()
     #sleep(2)
     flip()
