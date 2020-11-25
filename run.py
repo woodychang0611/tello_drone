@@ -2,6 +2,7 @@
 import rospy
 import roslib
 import sys
+import numpy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Empty, Bool, UInt8
 from tello_driver.msg import TelloStatus
@@ -9,6 +10,7 @@ from time import sleep
 from h264_image_transport.msg import H264Packet
 from sensor_msgs.msg import Image
 import cv2
+import av
 from cv_bridge import CvBridge, CvBridgeError
 from lib import StandaloneVideoStream
 
@@ -21,12 +23,30 @@ stream = StandaloneVideoStream()
 def subscribe_h264():
   print("subscribe h264")
   rospy.Subscriber("/tello/image_raw/h264", H264Packet, h264_callback)
+  retry=0
+  open_done = False
+  container = None
+  while (retry < 10 and not open_done):
+    try:
+      container = av.open(stream)
+      open_done=True
+      print("open stream ok")
+    except:
+      print("open stream failed")
+      retry+=1
+      sleep(0.5)
+
+  for frame in container.decode(video=0):
+     image = cv2.cvtColor(numpy.array(
+     frame.to_image()), cv2.COLOR_RGB2BGR)
+     cv2.imshow('Frame', image)
+     cv2.waitKey(1)
+
 
 def h264_callback(msg):
     #rospy.loginfo('frame: %d bytes' % len(msg.data))
-    print("h264 video callback")
+    #print("h264 video callback")
     stream.add_frame(msg.data)
-
 
 def init():
   print("init") 
