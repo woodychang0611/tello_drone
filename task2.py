@@ -7,6 +7,15 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Empty, UInt8
 from tello_driver.msg import TelloStatus, test
 from time import sleep
+from argparse import ArgumentParser
+
+#forward distance 
+
+parser = ArgumentParser()
+parser.add_argument("-dis", "--optional-arg", help="forward", dest="distance", default="0.3")
+args = parser.parse_args()
+distance = args.distance
+
 
 global target
 target = (-1,-1,1)
@@ -29,8 +38,9 @@ def ts_callback(data):
   if data.fly_mode == 12:
     canLand = True
 
-def cmd():
+def cmd(take_off=True):
   #The queue_size argument is New in ROS hydro and limits the amount of queued messages if any subscriber is not receiving them fast enough
+  print ("forward distance {0}".format(distance))
   rospy.init_node('h264_pub', anonymous=True)
   sleep(3)
   print("takeoff")
@@ -66,7 +76,7 @@ def cmd():
         rate.sleep()
         sleep(1)
         msg = Twist()
-        msg.linear.x = 0.2 
+        msg.linear.x = 0.5 
         cmd_pub.publish(msg)
         rate.sleep()
         sleep(2)
@@ -86,7 +96,7 @@ def cmd():
 
       if check == True or (dx == 0 or dy == 0):
         msg = Twist()
-        msg.linear.x = 0.5
+        msg.linear.x = distance
         cmd_pub.publish(msg)
         rate.sleep()
       else:
@@ -110,6 +120,7 @@ def L():
   rate = rospy.Rate(10)
   
   while canLand is not True:
+    
     msg = Empty()
     land_pub.publish(msg)
     rate.sleep()
