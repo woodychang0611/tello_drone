@@ -50,8 +50,10 @@ def cmd(take_off=True):
   msg = Empty()
   takeoff_pub.publish(msg)
   print("TakeOff done")
-  sleep(3)  
+  sleep(3)
+  print("subscribe self defined") 
   self_pub = rospy.Subscriber('/selfDefined', test, callback)
+  print("pub cmd_vel")
   cmd_pub = rospy.Publisher('/tello/cmd_vel', Twist, queue_size = 10)
   rate = rospy.Rate(10)
 
@@ -63,10 +65,11 @@ def cmd(take_off=True):
   while target[0] == -1 and target[1] == -1:
     pass 
 
+  print ("check shutdown")
   while not rospy.is_shutdown():
     dx = target[0] - center[0]
     dy = target[1] - center[1]
-
+    print("cmd")
     if target[2] == -1:
         msg = Twist()
         msg.linear.x = 0.2
@@ -95,8 +98,9 @@ def cmd(take_off=True):
           check = False
 
       if check == True or (dx == 0 or dy == 0):
+        print("forward")
         msg = Twist()
-        msg.linear.x = distance
+        msg.linear.x = float(distance)
         cmd_pub.publish(msg)
         rate.sleep()
       else:
@@ -114,6 +118,7 @@ def cmd(take_off=True):
   print("end loop")
 
 def L():
+  print ("land")
   global canLand
   land_sub = rospy.Subscriber('/tello/status', TelloStatus, ts_callback)
   land_pub = rospy.Publisher('/tello/land', Empty, queue_size = 1)
