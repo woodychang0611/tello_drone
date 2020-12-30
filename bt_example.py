@@ -21,7 +21,14 @@ if (sim_mode):
     print("sim mode")
 else:
     rospy.init_node('bt_mission', anonymous=True)
-
+    sleep(2)
+    print("takeoff")
+    takeoff_pub = rospy.Publisher('/tello/takeoff', Empty, queue_size =1)
+    sleep(3)
+    msg = Empty()
+    takeoff_pub.publish(msg)
+    print("TakeOff done")
+    sleep(3)
 
 
 class bt_mission:
@@ -40,7 +47,6 @@ class bt_mission:
     def __init__(self):
         self.tree = (
             self.RedNotFinish >> (self.NotReady2Pass | self.PassAndSwitch) >> ( (self.isNotCenter >> self.FixedPose) | (self.isCenter >> self.Forward) ) >> (self.rec_over1 | self.hover)
-            #|self.Rotate
             |self.BlueNotFinish >> (self.NotReady2Pass | self.PassAndLand) >> ( (self.isNotCenter >> self.FixedPose) | (self.isCenter >> self.Forward) ) >> (self.rec_over1 | self.hover)
         )
 
@@ -92,23 +98,15 @@ class bt_mission:
         print("condition: rec_over1")
         return rospy.get_time() - bt_mission.drone.suber.rec_time <= 1.0
     @action
-    def Rotate(self):
-       print("action:Rotate")
-       print("||||||||||||||||||||||||||||||||||||||")
-       if (sim_mode):
-           sleep(0.5)
-           return 
-       print("rotate")
-    @action
     def PassAndSwitch(self):
         print("action: PassAndSwitch")
         if (sim_mode):
             sleep(0.5)
-            print("rotate")  
+            print("=================rotate===================")  
             bt_mission.color="blue"
             return 
         msg = Twist()
-        msg.linear.x = 0.24
+        msg.linear.x = 0.5
         #msg.linear.y = -0.1
         bt_mission.cmd_pub.publish(msg)
         bt_mission.rate.sleep()
@@ -116,6 +114,11 @@ class bt_mission:
         msg = Twist()
         msg.linear.x = 0.26 
         #msg.linear.z = 0.2
+        bt_mission.cmd_pub.publish(msg)
+        bt_mission.rate.sleep()
+        sleep(2)
+        msg = Twist()
+        msg.angular.z = 1
         bt_mission.cmd_pub.publish(msg)
         bt_mission.rate.sleep()
         sleep(2)
