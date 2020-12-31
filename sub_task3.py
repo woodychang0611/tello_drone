@@ -52,7 +52,7 @@ class StandaloneVideoStream(object):
 stream = StandaloneVideoStream()
 
 global tag
-tag = 1
+tag = 0
 def callback(msg):
   #rospy.loginfo('frame: %d bytes' % len(msg.data))
   #if len(msg.data) > 1000:  
@@ -61,8 +61,11 @@ def callback(msg):
 
 def changeCB(msg):
   global tag
+  print("change color")
+  print(tag)
   if msg:
-    tag = 1
+    tag = 1 if (tag == 0) else 0
+    print("change color ok")
 
 def findMask(img):
   lr0 = np.array([0,150,0])
