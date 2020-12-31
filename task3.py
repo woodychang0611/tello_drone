@@ -106,14 +106,14 @@ class bt_mission:
             bt_mission.color="blue"
             return 
         msg = Twist()
-        msg.linear.x = 0.5
-        #msg.linear.y = -0.1
+        msg.linear.x = 0.35
+        msg.linear.y = -0.1
         bt_mission.cmd_pub.publish(msg)
         bt_mission.rate.sleep()
         sleep(2)
         msg = Twist()
         msg.linear.x = 0.26 
-        #msg.linear.z = 0.2
+        msg.linear.z = 0.2
         bt_mission.cmd_pub.publish(msg)
         bt_mission.rate.sleep()
         sleep(2)
